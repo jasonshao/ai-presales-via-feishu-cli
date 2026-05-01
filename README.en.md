@@ -2,9 +2,9 @@
 
 > 🌏 Languages: [中文](README.md) · **English**
 >
-> Turn a Feishu sales report into a customer-facing solution draft in under 30 minutes — using `lark-cli` for every Feishu read and write, and a Claude Code skill (`SKILL.md`) for the reasoning.
+> Turn a Feishu sales report into a customer-facing solution draft in under 30 minutes — using `lark-cli` for every Feishu read and write, driven by a **portable agent skill document** (`SKILL.md`) that any modern agent can load.
 
-This repository is an entry for the [Feishu CLI Creator Competition](https://www.feishu.cn/community/article/event?id=7629204812755635148) (GitHub track, "Best Practice Award" target). It packages a real internal AI-presales workflow as an open-source, runnable skill that any agent with `lark-cli` can pick up.
+This repository is an entry for the [Feishu CLI Creator Competition](https://www.feishu.cn/community/article/event?id=7629204812755635148) (GitHub track, "Best Practice Award" target). It packages a real internal AI-presales workflow as an open-source, runnable skill that **any agent that can read files and run shell commands** can pick up — Claude Code, Codex, OpenClaw, Cursor, your own Agent SDK, you name it.
 
 ---
 
@@ -12,6 +12,7 @@ This repository is an entry for the [Feishu CLI Creator Competition](https://www
 
 - [Why this exists](#why-this-exists)
 - [What the skill does](#what-the-skill-does)
+- [Which agents can run this](#which-agents-can-run-this)
 - [A complete demo walk-through](#a-complete-demo-walk-through)
 - [30-second offline demo](#30-second-offline-demo)
 - [Live Feishu demo](#live-feishu-demo)
@@ -73,6 +74,26 @@ Two run modes:
 
 - **Offline** — no Feishu credentials needed. Operates on the bundled fictional demo data under `examples/offline/`. Perfect for CI, demos, and judges.
 - **Live** — point at a Feishu Bitable via env vars in `examples/live/env.example`.
+
+## Which agents can run this
+
+[`SKILL.md`](skills/ai-presales/SKILL.md) is a **static, portable agent instruction document**. The format (YAML frontmatter + Markdown body) is a Claude Code convention, **but the body itself is agent-neutral** — any agent platform that can "read files + run shell" can drive this workflow directly.
+
+| Agent platform | How to wire it in | Notes |
+|---|---|---|
+| **Claude Code** | Symlink `skills/ai-presales/` into `~/.claude/skills/`, or use it directly inside the repo | Native format; auto-loads when the description matches |
+| **Codex** (Anthropic) | Clone the repo and prompt Codex e.g. "follow `skills/ai-presales/SKILL.md` to handle customer X's report" | Codex reads SKILL.md and executes the steps |
+| **OpenClaw** | Load SKILL.md as a system instruction, or treat it as a workflow doc / plugin | Same shape as Codex |
+| **Cursor / Continue** | Drop SKILL.md content into `.cursorrules` or a prompt template | Reasoning happens in the IDE agent; shell commands run in your terminal |
+| **Custom Agent SDK** | Use SKILL.md as the system prompt and give the agent a `bash` tool | Most general path — a few lines of code |
+| **Any capable LLM agent** | Same | Recommended capability ≥ Claude Sonnet 4.5 / GPT-4 class |
+
+The only hard dependencies are:
+
+1. The agent can read this repo's files.
+2. The agent can call `lark-cli` (or fall back to offline mode and read local JSON).
+
+**Why we don't pin to a single agent platform**: presales is a real-world workflow, and different teams use different agent stacks. The value of this skill is in the "Feishu + presales business flow" packaging — not in coupling to a specific agent vendor. The committed `examples/offline/expected-output.md` is a deterministic golden file, so **whatever agent runs this should produce a final draft close to that baseline**, with differences only in language polishing.
 
 ## A complete demo walk-through
 

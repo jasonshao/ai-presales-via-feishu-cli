@@ -5,6 +5,8 @@ description: Use this skill when a user asks to analyze a Feishu sales report, g
 
 # AI Presales via Feishu CLI
 
+> **Portability note.** This file uses the Claude Code skill format (frontmatter + body), but the body is agent-neutral. Any agent that can read files and run shell commands — Claude Code, Codex, OpenClaw, Cursor, a custom Agent SDK, etc. — can load this document as instructions and drive the workflow. The repo also ships a deterministic offline demo so the workflow can be validated with no agent at all.
+
 Turn a sales report stored in Feishu into:
 
 1. A **project recognition card** (which scenario this opportunity is, and how confident).

@@ -2,9 +2,9 @@
 
 > 🌏 Languages: **中文** · [English](README.en.md)
 >
-> 把飞书里的一条销售报备，30 分钟内变成一份可对客户讲的《客户解决方案》初稿 —— 全程通过 `lark-cli` 读写飞书，由一个 Claude Code Skill 驱动推理。
+> 把飞书里的一条销售报备，30 分钟内变成一份可对客户讲的《客户解决方案》初稿 —— 全程通过 `lark-cli` 读写飞书，由一个 **可移植的 Agent Skill 文档** 驱动推理。
 
-本仓库是 [飞书 CLI 创作者大赛](https://www.feishu.cn/community/article/event?id=7629204812755635148) GitHub 赛道的参赛作品，主攻 **最佳实践奖**。它把内部已经在跑的 AI 售前工作流，打包成开源、可即跑的 Skill —— 任何接好 `lark-cli` 的 Agent 都能拿来就用。
+本仓库是 [飞书 CLI 创作者大赛](https://www.feishu.cn/community/article/event?id=7629204812755635148) GitHub 赛道的参赛作品，主攻 **最佳实践奖**。它把内部已经在跑的 AI 售前工作流，打包成开源、可即跑的 Skill —— 任何接好 `lark-cli`、能读文件、能调用 shell 的 Agent 都能拿来就用：**Claude Code、Codex、OpenClaw、Cursor、自研 Agent SDK 通吃**。
 
 ---
 
@@ -12,6 +12,7 @@
 
 - [为什么要做这个](#为什么要做这个)
 - [这个 Skill 干什么](#这个-skill-干什么)
+- [支持哪些 Agent](#支持哪些-agent)
 - [一个完整的 Demo 走查](#一个完整的-demo-走查)
 - [30 秒离线 Demo](#30-秒离线-demo)
 - [在线飞书 Demo](#在线飞书-demo)
@@ -73,6 +74,26 @@ B2B 售前有一个高频且耗时的环节：**销售报备进来 → 售前要
 
 - **离线模式（Offline）**：不需要任何飞书凭证，跑 `examples/offline/` 下打包好的虚构样例数据。适合 CI、Demo、评委复现。
 - **在线模式（Live）**：通过 `examples/live/env.example` 里的环境变量指向真实的飞书多维表格。
+
+## 支持哪些 Agent
+
+[`SKILL.md`](skills/ai-presales/SKILL.md) 是一份 **静态的、可移植的 Agent 指令文档**。它的格式（YAML frontmatter + Markdown 正文）是 Claude Code 推广开来的约定，**但正文是 agent-neutral 的** —— 任何能「读文件 + 跑 shell」的 Agent 平台都能直接驱动这套工作流。
+
+| Agent 平台 | 怎么接入 | 备注 |
+|---|---|---|
+| **Claude Code** | 把 `skills/ai-presales/` 软链到 `~/.claude/skills/`，或者直接在仓库里用 | 原生格式，触发词命中后自动加载 |
+| **Codex**（Anthropic） | Clone 仓库后给 Codex 一个 prompt，例如「请按照 `skills/ai-presales/SKILL.md` 处理客户 X 的报备」 | Codex 会自己读 SKILL.md 并按步骤执行 |
+| **OpenClaw** | 把 SKILL.md 作为 system instruction 加载，或当成插件 / 工作流文档 | 同 Codex 模式 |
+| **Cursor / Continue** | 把 SKILL.md 内容作为 `.cursorrules` 或 prompt 模板的一部分 | 推理由 IDE 内 Agent 完成，shell 命令在终端里跑 |
+| **自研 Agent SDK** | 把 SKILL.md 当 system prompt + 给 Agent 一个 `bash` 工具 | 最通用方案，几行代码就能跑 |
+| **任何能力相当的 LLM Agent** | 同上 | 模型推荐能力 ≥ Claude Sonnet 4.5 / GPT-4 级别 |
+
+唯一硬性依赖只有两个：
+
+1. Agent 能读取本仓库的文件
+2. Agent 能调用 `lark-cli`（或者退化为离线模式，只读本地 JSON）
+
+**为什么不写死一个 agent 平台**：售前是一个非常实际的业务场景，不同公司用的 Agent 平台不一样。这个 Skill 的价值在于「飞书 + 售前业务流程」的封装，不在于绑定某一个 Agent 厂商。仓库的 `examples/offline/expected-output.md` 是确定性 Golden file，**任何 agent 跑出来的最终方案都应该跟这份基准接近**，差异只来自 agent 自己的语言润色。
 
 ## 一个完整的 Demo 走查
 

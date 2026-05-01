@@ -22,7 +22,7 @@ https://github.com/jasonshao/ai-presales-via-feishu-cli _(currently private — 
 
 ## One-line summary
 
-A Claude Code skill plus three thin Python scripts that turn a sales report stored in Feishu Bitable into a customer-facing solution draft, using `lark-cli` for every Feishu read and write. Includes a fully offline demo so any judge can run it without Feishu credentials.
+A portable agent skill (`SKILL.md`) plus three thin Python scripts that turn a sales report stored in Feishu Bitable into a customer-facing solution draft, using `lark-cli` for every Feishu read and write. The skill works with any agent that can read files and run shell commands (Claude Code, Codex, OpenClaw, Cursor, custom Agent SDKs). Includes a fully offline demo so any judge can run it without Feishu credentials.
 
 ## Why this fits the Best Practice Award
 

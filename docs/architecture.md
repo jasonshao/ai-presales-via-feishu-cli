@@ -4,7 +4,7 @@ The full design is in [`docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli
 
 ## One-line summary
 
-A Claude Code skill (`SKILL.md`) plus three thin Python scripts that turn a Feishu Bitable sales report into a customer-facing solution draft, using `lark-cli` for every Feishu read and write.
+A portable agent skill (`SKILL.md`) plus three thin Python scripts that turn a Feishu Bitable sales report into a customer-facing solution draft, using `lark-cli` for every Feishu read and write. The skill format is the Claude Code convention but the body is agent-neutral — Codex, OpenClaw, Cursor, custom Agent SDKs, etc. can all load and drive it.
 
 ## Component diagram
 
@@ -38,7 +38,7 @@ A Claude Code skill (`SKILL.md`) plus three thin Python scripts that turn a Feis
 └──────────────────────────┘
 ```
 
-The agent (Claude Code, or any agent that loads `SKILL.md`) is the conductor:
+Any agent that loads `SKILL.md` (Claude Code, Codex, OpenClaw, Cursor, a custom Agent SDK, …) is the conductor:
 
 1. Decides which mode to run (offline vs. live).
 2. Runs the three scripts.
