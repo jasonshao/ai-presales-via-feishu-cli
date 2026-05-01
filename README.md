@@ -1,31 +1,146 @@
 # 飞书 CLI 售前 Skill
 
 > 🌏 Languages: **中文** · [English](README.en.md)
+>
+> 把飞书里的一条销售报备，30 分钟内变成一份可对客户讲的《客户解决方案》初稿 —— 全程通过 `lark-cli` 读写飞书，由一个 Claude Code Skill 驱动推理。
 
-> 30 分钟内，把飞书里的一条销售报备转成一份可对客户讲的《客户解决方案》初稿。所有飞书读写都走 `lark-cli`，所有推理都由一个 Claude Code Skill（`SKILL.md`）驱动。
-
-本仓库是 [飞书 CLI 创作者大赛](https://www.feishu.cn/community/article/event?id=7629204812755635148) GitHub 赛道的参赛作品，主攻 **最佳实践奖**。它把内部已经在用的 AI 售前工作流，打包成一个开源、可直接跑通的 Skill —— 任何接好 `lark-cli` 的 Agent 都能拿来就用。
+本仓库是 [飞书 CLI 创作者大赛](https://www.feishu.cn/community/article/event?id=7629204812755635148) GitHub 赛道的参赛作品，主攻 **最佳实践奖**。它把内部已经在跑的 AI 售前工作流，打包成开源、可即跑的 Skill —— 任何接好 `lark-cli` 的 Agent 都能拿来就用。
 
 ---
 
-## 这个 Skill 能干什么
+## 目录
+
+- [为什么要做这个](#为什么要做这个)
+- [这个 Skill 干什么](#这个-skill-干什么)
+- [一个完整的 Demo 走查](#一个完整的-demo-走查)
+- [30 秒离线 Demo](#30-秒离线-demo)
+- [在线飞书 Demo](#在线飞书-demo)
+- [架构与设计原则](#架构与设计原则)
+- [飞书 CLI 集成点](#飞书-cli-集成点)
+- [扩展性：怎么加一个新场景](#扩展性怎么加一个新场景)
+- [测试与隐私扫描](#测试与隐私扫描)
+- [仓库结构](#仓库结构)
+- [给评委的复现指引](#给评委的复现指引)
+- [设计文档](#设计文档唯一事实源)
+- [贡献 / License](#贡献)
+
+---
+
+## 为什么要做这个
+
+B2B 售前有一个高频且耗时的环节：**销售报备进来 → 售前要在 30 分钟到 2 小时内，给销售一份能对客户讲的《客户解决方案》初稿**。
+
+实操中常见的痛点：
+
+1. **场景识别凭经验**。同一份报备，新人可能识别成 A 场景，老人识别成 B 场景，结论差很远。
+2. **报备信息不全**。销售常漏问关键信息（主体一致性、并发量、对账格式等），售前要往返追问 3-5 轮才能起草。
+3. **方案模板散落各处**。客户背景、推荐方案、相似案例、待澄清事项分散在十几个 Wiki/文档里，每次都要手动拼。
+4. **案例库没用起来**。历史成功案例多数躺在群聊截图和邮件里，新人根本搜不到。
+
+结果就是：**售前是一线最贵的瓶颈之一**。一个初级售前一天能产出 3-5 份方案就算高产，且质量参差不齐。
+
+这个 Skill 想做的事很具体：**把售前从「经验驱动的手工活」变成「Skill 驱动的协作流」**。
+
+- 销售报备一进飞书多维表格 → Agent 自动识别场景 + 找出缺口 + 给销售一份「待确认清单」 + 起草客户方案
+- 售前的角色从「写初稿」变成「审稿和定调」，单份方案产出时间目标 ≤ 30 分钟
+- 知识沉淀：场景包、产品能力、案例库都进飞书多维表格，每次新场景上线只需要加几行数据，不改代码
+
+## 这个 Skill 干什么
 
 [`skills/ai-presales/SKILL.md`](skills/ai-presales/SKILL.md) 是整个仓库的核心。它会指挥 Agent 完成下面这套售前闭环：
 
-1. **读取销售报备**：通过 `lark-cli base +record-list`，从飞书多维表格里读出销售报备、场景包、产品能力、案例库等参考资料。
-2. **场景识别**：判断该销售机会属于哪个售前场景，给出置信度和命中关键词。
-3. **缺口诊断**：自动整理出一份 5–8 项的「待销售确认清单」，把销售必须回答的问题挑出来。
-4. **方案撰写**：以 Markdown 格式起草一份对客解决方案 —— 包含客户背景、推荐方案、相似案例、待澄清事项四个部分。
-5. **写回飞书**：通过 `lark-cli docs +create` 把方案落到飞书云文档，并通过 `lark-cli base +record-upsert` 更新项目状态。
+```
+飞书销售报备进表
+        │
+        ▼
+[1] 读取报备 + 场景包/产品能力/案例库
+        │     (lark-cli base +record-list)
+        ▼
+[2] 场景识别（关键词匹配 → 置信度 + 命中关键词）
+        │
+        ▼
+[3] 缺口诊断（5-8 项「待销售确认清单」）
+        │
+        ▼
+[4] 方案撰写（Markdown：背景 / 推荐方案 / 相似案例 / 待澄清）
+        │
+        ▼
+[5] 写回飞书云文档 + 更新项目状态
+              (lark-cli docs +create / base +record-upsert)
+```
 
 两种运行模式：
 
-- **离线模式（Offline）**：不需要任何飞书凭证，直接跑 `examples/offline/` 下打包好的样例数据。适合 CI、Demo 和评委复现。
+- **离线模式（Offline）**：不需要任何飞书凭证，跑 `examples/offline/` 下打包好的虚构样例数据。适合 CI、Demo、评委复现。
 - **在线模式（Live）**：通过 `examples/live/env.example` 里的环境变量指向真实的飞书多维表格。
 
-## 快速上手
+## 一个完整的 Demo 走查
 
-### 30 秒离线 Demo
+仓库里打包了一份虚构案例 —— 茶饮连锁品牌「Beanlight Tea」想接小程序支付。
+
+**输入**：[`examples/offline/sales-report.json`](examples/offline/sales-report.json)（节选）
+
+```text
+客户：Beanlight Tea（虚构 Demo 公司）
+行业：餐饮 / 茶饮连锁
+报备摘要：约 120 家商场柜台店，想做带支付的品牌小程序，会员预订、积分。
+         已有 POS 但没有线上点单。希望 6-8 周上线。
+现状系统：自建 POS。无电商。财务每天 Excel 导出对账。
+交易规模：旺季约 60,000 单/日，客单 28 元。
+预期方案：自有 WeChat Pay 商户号下的小程序 + 支付，财务对账文件每日推送。
+报备时间：软目标 2026-07-15 上线。
+```
+
+**Skill 跑完之后产出**（[`examples/offline/expected-output.md`](examples/offline/expected-output.md) 完整版，下面是节选）：
+
+```markdown
+# Project Recognition Card
+
+- Customer: Beanlight Tea (Fictional Demo Co.)
+- Candidate scenario: Mini-program payment via API integration (PAY_API_MINIPROGRAM)
+- Confidence: high (score: 6)
+- Matched keywords: mini-program, WeChat mini-program, in-app payment,
+                    API integration, pre-order, branded mini-program
+- Completeness: 86% of 7 checklist items
+- Deadline: Soft target: 2026-07-15 launch.
+
+---
+
+# Follow-Up Checklist
+_6 answered, 1 missing of 7 required items._
+
+## Missing — ask sales before drafting
+- Are refunds, partial refunds, and after-sales tickets in scope for v1?
+
+---
+
+# Beanlight Tea x [Your Company] Solution Draft
+
+> Demo data — fictional customer. Reviewed by a human before sending.
+
+## 1. Customer Background And Needs
+   ...
+## 2. Recommended Solution
+   - Mini-program payment SDK + API: keep full UI control while we
+     handle order creation, payment invocation, async callback, recon.
+       - Constraint: Subject consistency mandatory.
+   - Daily reconciliation and finance export: T+1 SFTP push.
+       - Constraint: format must be agreed in discovery.
+## 3. Similar Cases
+   - CASE-DEMO-A1 (Tea chain, ~80 stores, recon SFTP, launched in 7 weeks)
+   - CASE-DEMO-B2 (Coffee chain, ~200 stores, member identity reuse)
+## 4. Assumptions And Open Questions
+   - Are refunds, partial refunds, and after-sales tickets in scope for v1?
+   - Subject-consistency reminder: signing entity = WeChat Pay merchant
+```
+
+整个过程对人的要求只剩三件事：
+
+1. 把销售报备写进多维表格（销售本来就要做的事）
+2. 看一眼 Agent 给的「待确认清单」，回去问销售
+3. 看一眼 Agent 起草的方案，调整措辞，发给客户
+
+## 30 秒离线 Demo
 
 ```bash
 python skills/ai-presales/scripts/validate_sample_data.py examples/offline
@@ -33,9 +148,11 @@ python skills/ai-presales/scripts/collect_context.py --offline examples/offline 
 python skills/ai-presales/scripts/render_solution.py --context /tmp/presales-context.json --out /tmp/customer-solution.md
 ```
 
-第三条命令产出的文件，会跟 [examples/offline/expected-output.md](examples/offline/expected-output.md) 完全一致 —— 包括项目识别卡 + 待确认清单 + 客户解决方案初稿三大产物。
+第三条命令产出的文件，会跟 [`examples/offline/expected-output.md`](examples/offline/expected-output.md) 完全一致 —— 包括项目识别卡 + 待确认清单 + 客户方案初稿三大产物。
 
-### 在线飞书 Demo
+> 不需要飞书账号、不需要 lark-cli、不需要 Token。打开仓库就能跑。
+
+## 在线飞书 Demo
 
 ```bash
 # 1. 确认 lark-cli 已经登录
@@ -43,7 +160,7 @@ lark-cli auth status   # tokenStatus: valid
 
 # 2. 配置 Demo 用的多维表格
 cp examples/live/env.example ~/.presales.env
-# 把 6 个 PRESALES_* 变量填上真实值，然后：
+# 填写 6 个 PRESALES_* 变量后：
 set -a; source ~/.presales.env; set +a
 
 # 3. 用同一套脚本跑在线模式
@@ -55,22 +172,111 @@ lark-cli docs +create \
   --folder-token "$PRESALES_OUTPUT_FOLDER_TOKEN" \
   --title "Customer Solution Draft (demo)" \
   --markdown @/tmp/customer-solution.md
+
+# 5. 更新项目状态
+lark-cli base +record-upsert \
+  --base-token "$PRESALES_BASE_TOKEN" \
+  --table-id "$PRESALES_STATUS_TABLE" \
+  --json '{"project_id":"demo-2026-001","status":"draft_generated","confidence":"high"}'
 ```
 
-完整的在线模式 runbook 见 [`examples/live/feishu-command-examples.md`](examples/live/feishu-command-examples.md)。
+完整的在线 runbook 见 [`examples/live/feishu-command-examples.md`](examples/live/feishu-command-examples.md)。
 
-## 为什么这是一个真正的「飞书 CLI Skill」，而不是一段通用 Prompt
+## 架构与设计原则
+
+```
+┌──────────────────────────┐
+│  飞书多维表格销售报备    │
+└────────────┬─────────────┘
+             │  lark-cli base +record-list
+             ▼
+┌──────────────────────────┐      ┌──────────────────────────┐
+│  collect_context.py      │ ◄─── │  examples/offline/*.json │
+│  （离线 │ 在线 双模式）  │      │  （离线兜底数据）        │
+└────────────┬─────────────┘      └──────────────────────────┘
+             │  context.json（确定性结构化上下文）
+             ▼
+┌──────────────────────────┐
+│  render_solution.py      │  ← Skill 让 Agent 在这一步上面再做推理
+│  → Markdown              │     - 项目识别卡
+│                          │     - 待销售确认清单
+│                          │     - 客户解决方案初稿
+└────────────┬─────────────┘
+             │  lark-cli docs +create
+             │  lark-cli base +record-upsert
+             ▼
+┌──────────────────────────┐
+│  飞书云文档（方案初稿）  │
+│  + 项目状态表更新        │
+└──────────────────────────┘
+```
+
+**核心设计原则：脚本做确定性，Skill 做推理**
+
+- **脚本是确定性的**。同一份输入，每次跑结果都一样。这让测试、CI、Diff 校验成为可能。
+- **Skill 拥有推理权**。场景识别的细微差别、案例匹配的取舍、客户措辞的语气 —— 都需要 Agent 真正动脑，硬塞进脚本只会变成脆弱的模板。
+- **添加场景不改代码**。多一个场景？多维表格里加一行就行，渲染器不需要改。
+
+**为什么用 `lark-cli` 而不是直接写 SDK**
+
+- 鉴权直接复用用户已有的飞书 CLI 登录态，不需要单独跑 OAuth
+- CLI 表层比底层 API 稳定得多，飞书 API 升级不会动到 Skill
+- 不熟悉的命令时，Agent 可以 `lark-cli --help` / `lark-cli schema` 自我发现，而不是凭空猜参数
+- 这是大赛官方主推的接入方式
+
+## 飞书 CLI 集成点
 
 | 飞书 CLI 集成点 | 在仓库里的位置 |
 |---|---|
 | 鉴权检查 `lark-cli auth status` | [`SKILL.md`](skills/ai-presales/SKILL.md) 在线流程第 1 步 |
 | 多维表格读 `lark-cli base +record-list` | [`collect_context.py`](skills/ai-presales/scripts/collect_context.py) 的 `load_live` 函数 |
-| 多维表格写 `lark-cli base +record-upsert` | 在线 runbook 第 6 步 |
-| 云文档创建 `lark-cli docs +create` | 在线 runbook 第 5 步 |
-| Wiki/Docx 拉取 `lark-cli docs +fetch` | `SKILL.md` 中可选的决策指南读取 |
+| 多维表格表列举 `lark-cli base +table-list` | [`feishu-command-examples.md`](examples/live/feishu-command-examples.md) §2 |
+| 多维表格写 `lark-cli base +record-upsert` | 在线 runbook 第 5 步 |
+| 云文档创建 `lark-cli docs +create` | 在线 runbook 第 4 步 |
+| Wiki/Docx 拉取 `lark-cli docs +fetch` | `SKILL.md` 中的可选决策指南读取 |
 | Schema 发现 `lark-cli schema …` | `SKILL.md` 排障章节 |
 
-Skill 里明确告诉 Agent：遇到不确定的命令形态，**优先 `lark-cli --help` 和 `lark-cli schema`**，而不是凭记忆猜参数。这样即使飞书 CLI 升级，整套流程也不容易腐烂。
+Skill 里明确告诉 Agent：遇到不确定的命令形态，**优先 `lark-cli --help` / `lark-cli schema`**，而不是凭记忆猜参数。这样飞书 CLI 升级时整套流程不容易腐烂。
+
+## 扩展性：怎么加一个新场景
+
+假设你想加一个「门店收银设备升级评估」场景，步骤就 3 步：
+
+1. 在 [`examples/offline/scenario-packages.json`](examples/offline/scenario-packages.json) 里加一条记录（schema 见 [`scenario-package-schema.md`](skills/ai-presales/references/scenario-package-schema.md)）：
+   ```json
+   {
+     "scenario_id": "POS_UPGRADE_ASSESS",
+     "scenario_name": "Store POS upgrade assessment",
+     "trigger_keywords": ["POS upgrade", "替换收银", "门店升级", "..."],
+     "entry_conditions": ["..."],
+     "confirmation_checklist": ["...", "..."],
+     "decision_rules": ["if X then Y"],
+     "supported_outputs": ["recognition card", "follow-up checklist"],
+     "fallback_message": "..."
+   }
+   ```
+2. 在 [`product-capabilities.json`](examples/offline/product-capabilities.json) 里把适配该场景的能力 `applicable_scenarios` 加上 `"POS_UPGRADE_ASSESS"`
+3. 加一条虚构案例到 [`case-library.json`](examples/offline/case-library.json)，`scenario_tags` 含 `"POS_UPGRADE_ASSESS"`，`public_safe: true`
+
+`pytest` 自动覆盖你新增的场景。**不需要改 Python 代码、不需要改 Skill、不需要改渲染器**。
+
+线上版本同理 —— 直接在飞书多维表格里加一行就行。
+
+## 测试与隐私扫描
+
+```bash
+python -m pytest -q
+```
+
+13 项测试覆盖：
+
+- ✅ 样例数据通过 schema 校验
+- ✅ 上下文收集器对 Demo 报备给出预期的 `PAY_API_MINIPROGRAM` 高置信匹配
+- ✅ 渲染器输出包含设计文档 §10.3 要求的全部章节
+- ✅ 渲染器输出与打包好的 [`expected-output.md`](examples/offline/expected-output.md) **逐字符相等**（Golden file 对比）
+- ✅ 隐私扫描在全仓库范围内捕捉违禁 Token、被赋值的密钥、私有飞书 URL（黑名单详见 [`privacy-rules.md`](skills/ai-presales/references/privacy-rules.md)）
+
+**隐私扫描尤其重要**：开源项目一旦有真凭实据漏进 commit（Token、生产客户的名字、内部链接……），git 历史就再也抹不干净。所以这条扫描是 CI 的拦门关，宁可严不可松。
 
 ## 仓库结构
 
@@ -78,58 +284,82 @@ Skill 里明确告诉 Agent：遇到不确定的命令形态，**优先 `lark-cl
 ai-presales-via-feishu-cli/
   README.md                            # 你正在看的中文版
   README.en.md                         # 英文版
-  LICENSE
-  pyproject.toml
+  LICENSE                              # MIT
+  pyproject.toml                       # Python 3.10+，唯一依赖：pytest
   skills/ai-presales/
-    SKILL.md                           # Skill 本体 —— 整个项目的心脏
+    SKILL.md                           # ⭐ Skill 本体 —— 整个项目的心脏
     references/
-      solution-template.md             # 客户方案模板
-      scenario-package-schema.md       # 场景包 schema
+      solution-template.md             # 客户方案 Markdown 模板
+      scenario-package-schema.md       # 场景包字段规范
       base-schema.md                   # 飞书多维表格字段映射
       privacy-rules.md                 # 公开安全规则
     scripts/
       validate_sample_data.py          # 样例数据校验
-      collect_context.py               # 上下文收集（离线 + 在线）
-      render_solution.py               # Markdown 方案渲染
+      collect_context.py               # 上下文收集（离线 + 在线 双模式）
+      render_solution.py               # Markdown 方案渲染（确定性）
   examples/
     offline/                           # 公开安全的虚构样例数据
-    live/                              # 环境变量模板 + lark-cli runbook
+      sales-report.json                #   销售报备（Beanlight Tea）
+      scenario-packages.json           #   2 个场景包
+      product-capabilities.json        #   3 个产品能力
+      case-library.json                #   3 条虚构案例
+      expected-output.md               #   Golden file（渲染器输出）
+    live/                              # 在线模式
+      env.example                      #   环境变量模板
+      feishu-command-examples.md       #   完整 lark-cli runbook
   docs/
     architecture.md                    # 架构速读
     demo-script.md                     # 2-3 分钟 Demo 解说稿
     contest-submission.md              # 参赛说明
-    superpowers/specs/                 # 完整设计文档
+    superpowers/specs/                 # 完整设计文档（约 600 行）
   tests/                               # pytest，含全仓库隐私扫描
 ```
 
-## Demo 数据全部虚构
+## 给评委的复现指引
 
-`examples/` 下所有数据都是**虚构**的。Demo 客户「Beanlight Tea」不存在，仓库内不包含任何真实的客户名称、内部案例、飞书 Token 或私有飞书链接 —— 详见 [`skills/ai-presales/references/privacy-rules.md`](skills/ai-presales/references/privacy-rules.md)。隐私扫描测试 [`tests/test_privacy_scan.py`](tests/test_privacy_scan.py) 会在每次 `pytest` 时把关，防止泄漏。
-
-## 运行测试
+如果你是大赛评委，下面是 5 分钟内全面验证这个项目的最短路径：
 
 ```bash
+# 1. clone
+git clone https://github.com/jasonshao/ai-presales-via-feishu-cli
+cd ai-presales-via-feishu-cli
+
+# 2. 装依赖（仅 pytest）
+python -m pip install --user pytest
+
+# 3. 跑测试 —— 13 项全绿（约 0.5 秒）
 python -m pytest -q
+
+# 4. 跑离线 Demo
+python skills/ai-presales/scripts/collect_context.py --offline examples/offline --out /tmp/c.json
+python skills/ai-presales/scripts/render_solution.py --context /tmp/c.json --out /tmp/s.md
+
+# 5. 对比生成结果与 Golden file（应完全一致）
+diff /tmp/s.md examples/offline/expected-output.md && echo "GOLDEN MATCH"
+
+# 6. （可选）检查飞书 CLI 集成点
+grep -rE "lark-cli" skills/ examples/ README.md | wc -l   # 至少 30+ 处
 ```
 
-测试覆盖：
+看代码的优先级建议：
 
-- 样例数据通过 schema 校验。
-- 上下文收集器对 Demo 报备给出预期的场景匹配结果。
-- 渲染器输出包含设计文档 §10.3 中要求的全部章节。
-- 隐私扫描在全仓库范围内捕捉违禁 Token、被赋值的密钥、以及私有飞书 URL（黑名单详见 [`privacy-rules.md`](skills/ai-presales/references/privacy-rules.md)）。
+1. [`skills/ai-presales/SKILL.md`](skills/ai-presales/SKILL.md) —— Skill 本体，10 分钟读完
+2. [`docs/architecture.md`](docs/architecture.md) —— 架构速读
+3. [`examples/offline/expected-output.md`](examples/offline/expected-output.md) —— 看 Skill 跑完长什么样
+4. [`docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md`](docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md) —— 完整设计文档（深度阅读）
 
 ## 设计文档（唯一事实源）
 
-完整设计文档位于 [`docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md`](docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md)。文档分别讲解了 Skill / 鉴权 / 知识访问 / 工作流编排 / 人机协同 / 输出资产 / 度量 这 7 个层面，是扩展或 Fork 本 Skill 的权威参考。
+完整设计文档位于 [`docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md`](docs/superpowers/specs/2026-05-01-ai-presales-feishu-cli-skill-design.md)。文档分别讲解了 Skill / 鉴权 / 知识访问 / 工作流编排 / 人机协同 / 输出资产 / 度量 7 个层面，是扩展或 Fork 本 Skill 的权威参考。
 
 ## 贡献
 
 欢迎 Issue 和 PR，尤其是：
 
-- 新的场景包（请遵守 [`scenario-package-schema.md`](skills/ai-presales/references/scenario-package-schema.md)）。
-- Skill 应该知道的新 `lark-cli` 集成点。
-- 更聪明的确定性场景匹配算法（当前实现刻意保持简单）。
+- 新的场景包（请遵守 [`scenario-package-schema.md`](skills/ai-presales/references/scenario-package-schema.md)）
+- Skill 应该知道的新 `lark-cli` 集成点
+- 更聪明的确定性场景匹配算法（当前刻意保持简单）
+- 在线模式下的更多端到端 Demo 视频
 
 提交 PR 即视为同意：贡献内容以 MIT 协议开源，且不包含任何内部客户数据。
 
