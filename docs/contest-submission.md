@@ -18,7 +18,7 @@ The entry is intentionally not optimized for the Highest Stars Award — it targ
 
 ## Repo URL
 
-`https://github.com/jasonshao/ai-presales-via-feishu-cli` _(populate after the repo is published)_
+https://github.com/jasonshao/ai-presales-via-feishu-cli _(currently private — flip to public before the contest deadline)_
 
 ## One-line summary
 
