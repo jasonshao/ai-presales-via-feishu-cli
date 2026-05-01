@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.python-version
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Local env / secrets — must NEVER be committed
+.env
+.env.*
+!examples/live/env.example
+*.token
+*.tokens
+secrets.json
+data/tokens.json
+
+# Local artifacts
+/tmp/
+*.log
+build/
+dist/
+
+# Feishu CLI auth caches (local only)
+.lark-cli/
+.feishu-cli/

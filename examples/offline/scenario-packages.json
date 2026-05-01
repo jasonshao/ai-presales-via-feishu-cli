@@ -1,0 +1,80 @@
+{
+  "_demo_notice": "Fictional scenario packages. Generic capability descriptions only.",
+  "records": [
+    {
+      "scenario_id": "PAY_API_MINIPROGRAM",
+      "scenario_name": "Mini-program payment via API integration",
+      "trigger_keywords": [
+        "mini-program",
+        "miniprogram",
+        "WeChat mini-program",
+        "in-app payment",
+        "API integration",
+        "pre-order",
+        "branded mini-program"
+      ],
+      "entry_conditions": [
+        "Customer wants to launch a branded WeChat mini-program with payment.",
+        "Customer prefers API integration over a packaged storefront.",
+        "Customer has or is willing to register a WeChat Pay merchant account."
+      ],
+      "confirmation_checklist": [
+        "Does the customer already hold a WeChat Pay merchant account, or do they need help registering one?",
+        "Will the merchant entity behind WeChat Pay match the entity that will sign with us? (Subject consistency is mandatory.)",
+        "What is the expected peak transaction volume per second, and what is the daily order count?",
+        "Is the existing POS the source of truth, or will the mini-program become the source of truth for in-store orders?",
+        "What is the required reconciliation format and frequency for finance?",
+        "Are refunds, partial refunds, and after-sales tickets in scope for v1?",
+        "What is the customer's launch deadline and which scope must ship first?"
+      ],
+      "decision_rules": [
+        "If subject consistency cannot be achieved, escalate before any commitment.",
+        "If peak TPS exceeds the standard mini-program payment SLA, propose load testing before sign-off.",
+        "If the customer wants storefront UI rather than API control, redirect to the packaged-storefront scenario instead."
+      ],
+      "supported_outputs": [
+        "Project recognition card",
+        "Follow-up checklist",
+        "Customer solution draft (technical flow + commercial highlights)"
+      ],
+      "fallback_message": "If the project does not meet entry conditions, mark scenario confidence as low and request additional discovery before drafting."
+    },
+    {
+      "scenario_id": "SHOP_WECHAT_BASIC",
+      "scenario_name": "WeChat Shop feasibility and scope assessment",
+      "trigger_keywords": [
+        "WeChat shop",
+        "video account shop",
+        "shop integration",
+        "shop feasibility",
+        "shop scope"
+      ],
+      "entry_conditions": [
+        "Customer asks whether a WeChat shop is appropriate for their goods or services.",
+        "Customer is unclear whether custom development is required.",
+        "Customer has no existing shop yet, or wants to assess migration."
+      ],
+      "confirmation_checklist": [
+        "What categories of goods or services will be sold through the shop?",
+        "Are any categories restricted on the WeChat Shop platform?",
+        "What inventory and order volume is expected at launch and peak?",
+        "Does the customer require custom front-end UI, or is the standard shop layout acceptable?",
+        "What back-office systems need to be integrated, and via what API?",
+        "Is cross-border or multi-currency support required?",
+        "What is the launch deadline and any compliance review window?"
+      ],
+      "decision_rules": [
+        "If the goods category is restricted, mark as not feasible and recommend an alternative scenario.",
+        "If standard shop UI is acceptable and there is no integration requirement, classify as 'no custom development needed'.",
+        "If standard shop is acceptable but back-office integration is required, classify as 'integration only'.",
+        "If front-end customization is required beyond template options, classify as 'custom development required'."
+      ],
+      "supported_outputs": [
+        "Project recognition card",
+        "Follow-up checklist",
+        "Customer solution draft (feasibility verdict + scope category)"
+      ],
+      "fallback_message": "If category restrictions or compliance gaps cannot be confirmed, mark feasibility as 'pending verification' and do not commit a delivery scope."
+    }
+  ]
+}

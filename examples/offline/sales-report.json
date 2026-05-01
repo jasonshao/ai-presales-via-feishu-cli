@@ -1,0 +1,23 @@
+{
+  "_demo_notice": "Fictional sample data. Not based on any real customer.",
+  "records": [
+    {
+      "project_id": "demo-2026-001",
+      "customer_name": "Beanlight Tea (Fictional Demo Co.)",
+      "industry": "Food & Beverage / Specialty Tea Chain",
+      "sales_owner": "demo.sales@example.com",
+      "report_summary": "Beanlight Tea operates ~120 mall-counter stores and wants to launch a branded WeChat mini-program where members can pre-order, pay, and earn loyalty points. They have an existing POS but no online ordering. They want to know whether we can help them ship a payment-enabled mini-program in 6-8 weeks.",
+      "known_requirements": [
+        "Branded WeChat mini-program for pre-order pickup",
+        "In-app payment for orders",
+        "Member identity tied to existing phone-number-based loyalty program",
+        "Daily settlement reporting for finance team"
+      ],
+      "current_system": "Self-built POS deployed in-store. No e-commerce platform. No prior mini-program. Finance reconciles daily via Excel exports.",
+      "transaction_scale": "Roughly 60,000 orders per day across all stores during peak season. Average ticket ~28 RMB.",
+      "expected_solution": "A WeChat mini-program with payment that the customer can launch under their own corporate WeChat Pay merchant account, with daily reconciliation files matching their finance format.",
+      "deadline": "Soft target: 2026-07-15 launch.",
+      "raw_notes": "Sales call notes (paraphrased): Customer is decisive, has already registered a WeChat Pay merchant account but has not done any technical integration. They want to keep their POS as the source of truth for in-store transactions. The CFO is the budget owner and is sensitive to monthly platform fees. They asked specifically whether we could integrate via API rather than using a packaged storefront, because they want to control the UI."
+    }
+  ]
+}

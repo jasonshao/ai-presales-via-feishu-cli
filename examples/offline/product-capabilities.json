@@ -1,0 +1,51 @@
+{
+  "_demo_notice": "Fictional capability descriptions for demo. Public-safe, generic phrasing.",
+  "records": [
+    {
+      "product_line": "Payments / Mini-program",
+      "capability_name": "Mini-program payment SDK + API",
+      "applicable_scenarios": ["PAY_API_MINIPROGRAM"],
+      "value_proposition": "Lets the customer keep full UI control while we handle the payment plumbing: order creation, payment invocation, async result callback, and reconciliation file generation.",
+      "constraints": [
+        "Requires the customer's WeChat Pay merchant account.",
+        "The signing entity for the contract and the merchant account holder must match (subject consistency).",
+        "Refund flow requires merchant-side certificate provisioning."
+      ],
+      "implementation_notes": [
+        "Standard order lifecycle: create order -> invoke wx.requestPayment -> server async notify -> reconciliation.",
+        "Daily reconciliation file is generated server-side and pushed to a customer SFTP or downloaded via API.",
+        "Sandbox keys are issued during integration."
+      ],
+      "sales_talk_track": "We provide the payment integration as an API + SDK so you keep full control over your mini-program UI, while we ensure the payment, callback, and reconciliation flow is reliable and finance-ready."
+    },
+    {
+      "product_line": "Reconciliation / Finance",
+      "capability_name": "Daily reconciliation and finance export",
+      "applicable_scenarios": ["PAY_API_MINIPROGRAM", "SHOP_WECHAT_BASIC"],
+      "value_proposition": "Generates daily transaction summaries and detail lines in a customer-defined format so the finance team can reconcile without manual exports.",
+      "constraints": [
+        "Format must be agreed during discovery.",
+        "T+1 delivery is standard; T+0 requires additional architecture review."
+      ],
+      "implementation_notes": [
+        "Default outputs: a CSV summary and a CSV detail file per merchant per day.",
+        "Optional: push to customer SFTP, push to a customer S3-compatible bucket, or expose via API."
+      ],
+      "sales_talk_track": "Your finance team gets a reconciliation file in their format every day, so they stop emailing exports back and forth."
+    },
+    {
+      "product_line": "Shop / Catalog",
+      "capability_name": "WeChat Shop scope advisory",
+      "applicable_scenarios": ["SHOP_WECHAT_BASIC"],
+      "value_proposition": "Walks the customer through whether their category is allowed, what the standard shop covers, and where development is or is not required.",
+      "constraints": [
+        "Advisory only; the customer is responsible for category compliance review.",
+        "Custom front-end work is scoped separately."
+      ],
+      "implementation_notes": [
+        "Output is a one-page feasibility memo with a clear verdict in one of four categories: not feasible, no development needed, integration only, custom development required."
+      ],
+      "sales_talk_track": "Before we quote any development, we tell you whether the standard WeChat Shop already covers what you need, so you do not pay for work you do not require."
+    }
+  ]
+}

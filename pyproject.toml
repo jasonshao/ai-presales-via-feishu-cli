@@ -1,0 +1,15 @@
+[project]
+name = "ai-presales-via-feishu-cli"
+version = "0.1.0"
+description = "Feishu CLI AI Presales Skill — turn a sales report in Feishu into a customer-facing solution draft"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

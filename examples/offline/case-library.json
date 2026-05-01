@@ -1,0 +1,50 @@
+{
+  "_demo_notice": "All cases are fictional. public_safe must be true for any record used in public examples.",
+  "records": [
+    {
+      "case_id": "CASE-DEMO-A1",
+      "industry": "Specialty drinks / Tea chain",
+      "customer_profile": "Mid-sized regional tea chain, ~80 stores, branded mini-program use case.",
+      "scenario_tags": ["PAY_API_MINIPROGRAM"],
+      "pain_points": [
+        "No prior online ordering channel.",
+        "Daily reconciliation done manually in spreadsheets.",
+        "Wanted full UI control of the mini-program."
+      ],
+      "solution_summary": "Integrated payment via API + SDK while the customer kept their own mini-program UI. Daily reconciliation was delivered to their finance SFTP.",
+      "product_lines": ["Payments / Mini-program", "Reconciliation / Finance"],
+      "outcome": "Launched in 7 weeks. Finance reconciliation went from ~3 hours per day to under 10 minutes.",
+      "public_safe": true
+    },
+    {
+      "case_id": "CASE-DEMO-B2",
+      "industry": "Coffee chain",
+      "customer_profile": "Coffee chain, ~200 stores, brand wanted to add pre-order pickup and member top-up wallet.",
+      "scenario_tags": ["PAY_API_MINIPROGRAM"],
+      "pain_points": [
+        "Existing POS but no online ordering.",
+        "Member system used phone-number identity already.",
+        "Peak-hour throughput at flagship stores was a concern."
+      ],
+      "solution_summary": "Mini-program payment via API integration, with member identity reused via phone number, and a load test plan for peak stores before go-live.",
+      "product_lines": ["Payments / Mini-program"],
+      "outcome": "Launched on time. Pre-order pickup hit 22% of total orders within 6 weeks of launch.",
+      "public_safe": true
+    },
+    {
+      "case_id": "CASE-DEMO-C3",
+      "industry": "Lifestyle apparel",
+      "customer_profile": "Lifestyle apparel brand evaluating whether to launch a WeChat shop or build custom.",
+      "scenario_tags": ["SHOP_WECHAT_BASIC"],
+      "pain_points": [
+        "Not sure whether their category was allowed.",
+        "Wanted a custom-feeling brand experience.",
+        "Limited internal engineering bandwidth."
+      ],
+      "solution_summary": "Feasibility advisory determined category was allowed and standard shop covered most needs. Recommended 'integration only' with the existing ERP for inventory.",
+      "product_lines": ["Shop / Catalog"],
+      "outcome": "Customer skipped a six-figure custom build and launched in 3 weeks via standard shop + ERP integration.",
+      "public_safe": true
+    }
+  ]
+}
