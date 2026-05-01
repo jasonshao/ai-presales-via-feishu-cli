@@ -112,48 +112,49 @@ B2B 售前有一个高频且耗时的环节：**销售报备进来 → 售前要
 报备时间：软目标 2026-07-15 上线。
 ```
 
-**Skill 跑完之后产出**（[`examples/offline/expected-output.md`](examples/offline/expected-output.md) 完整版，下面是节选）：
+**Skill 跑完之后产出**（节选，下方为中文意译；完整原文见 [`examples/offline/expected-output.md`](examples/offline/expected-output.md)）：
 
 ```markdown
-# Project Recognition Card
+# 项目识别卡
 
-- Customer: Beanlight Tea (Fictional Demo Co.)
-- Candidate scenario: Mini-program payment via API integration (PAY_API_MINIPROGRAM)
-- Confidence: high (score: 6)
-- Matched keywords: mini-program, WeChat mini-program, in-app payment,
-                    API integration, pre-order, branded mini-program
-- Completeness: 86% of 7 checklist items
-- Deadline: Soft target: 2026-07-15 launch.
-
----
-
-# Follow-Up Checklist
-_6 answered, 1 missing of 7 required items._
-
-## Missing — ask sales before drafting
-- Are refunds, partial refunds, and after-sales tickets in scope for v1?
+- 客户：Beanlight Tea（虚构 Demo 公司）
+- 候选场景：小程序支付 · API 接入（PAY_API_MINIPROGRAM）
+- 置信度：高（命中分数：6）
+- 命中关键词：小程序、微信小程序、应用内支付、API 接入、预订、品牌小程序
+- 完整度：86%（7 项确认清单已覆盖 6 项）
+- 期限：软目标 2026-07-15 上线
 
 ---
 
-# Beanlight Tea x [Your Company] Solution Draft
+# 待销售确认清单
+_7 项中，已覆盖 6 项，待确认 1 项。_
 
-> Demo data — fictional customer. Reviewed by a human before sending.
+## 待确认 —— 起草前先问销售
+- v1 是否需要支持退款、部分退款、售后工单？
 
-## 1. Customer Background And Needs
+---
+
+# Beanlight Tea × [贵司] 客户解决方案初稿
+
+> Demo 数据 —— 虚构客户。发出前请人工 Review。
+
+## 1. 客户背景与需求
    ...
-## 2. Recommended Solution
-   - Mini-program payment SDK + API: keep full UI control while we
-     handle order creation, payment invocation, async callback, recon.
-       - Constraint: Subject consistency mandatory.
-   - Daily reconciliation and finance export: T+1 SFTP push.
-       - Constraint: format must be agreed in discovery.
-## 3. Similar Cases
-   - CASE-DEMO-A1 (Tea chain, ~80 stores, recon SFTP, launched in 7 weeks)
-   - CASE-DEMO-B2 (Coffee chain, ~200 stores, member identity reuse)
-## 4. Assumptions And Open Questions
-   - Are refunds, partial refunds, and after-sales tickets in scope for v1?
-   - Subject-consistency reminder: signing entity = WeChat Pay merchant
+## 2. 推荐方案
+   - 小程序支付 SDK + API：客户保留完整 UI 控制权，我方负责
+     订单创建 / 拉起支付 / 异步回调 / 对账 等支付链路。
+       - 约束：主体一致性必须满足。
+   - 每日对账与财务导出：T+1 SFTP 推送。
+       - 约束：对账文件格式需在 Discovery 阶段谈定。
+## 3. 相似案例
+   - CASE-DEMO-A1（茶饮连锁，约 80 家店，对账走 SFTP，7 周上线）
+   - CASE-DEMO-B2（咖啡连锁，约 200 家店，复用手机号会员体系）
+## 4. 假设与待澄清
+   - v1 是否需要支持退款、部分退款、售后工单？
+   - 主体一致性提示：签约主体 = 微信支付商户主体
 ```
+
+> 上面是中文意译，方便中文读者快速读懂结构。仓库内的 Golden file（`expected-output.md`）和渲染器输出当前是英文，因为示例数据走的是 B2B 售前常见的英文术语；改成中文输出只需要替换 `render_solution.py` 里的章节标题模板，不影响整体设计。
 
 整个过程对人的要求只剩三件事：
 
