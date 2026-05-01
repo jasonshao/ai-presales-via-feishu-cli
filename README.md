@@ -4,7 +4,7 @@
 >
 > 把飞书里的一条销售报备，30 分钟内变成一份可对客户讲的《客户解决方案》初稿 —— 全程通过 `lark-cli` 读写飞书，由一个 **可移植的 Agent Skill 文档** 驱动推理。
 
-本仓库是 [飞书 CLI 创作者大赛](https://www.feishu.cn/community/article/event?id=7629204812755635148) GitHub 赛道的参赛作品，主攻 **最佳实践奖**。它把内部已经在跑的 AI 售前工作流，打包成开源、可即跑的 Skill —— 任何接好 `lark-cli`、能读文件、能调用 shell 的 Agent 都能拿来就用：**Claude Code、Codex、OpenClaw、Cursor、自研 Agent SDK 通吃**。
+这是一个开源的 **AI 售前工作流 Skill**：把内部跑通的售前流程，封装成一份可移植的 `SKILL.md` + 三个轻量 Python 脚本 + 一套虚构 Demo 数据。任何接好 `lark-cli`、能读文件、能调用 shell 的 Agent 都能拿来就用：**Claude Code、Codex、OpenClaw、Cursor、自研 Agent SDK 通吃**。
 
 ---
 
@@ -21,7 +21,7 @@
 - [扩展性：怎么加一个新场景](#扩展性怎么加一个新场景)
 - [测试与隐私扫描](#测试与隐私扫描)
 - [仓库结构](#仓库结构)
-- [给评委的复现指引](#给评委的复现指引)
+- [5 分钟快速验证](#5-分钟快速验证)
 - [设计文档](#设计文档唯一事实源)
 - [贡献 / License](#贡献)
 
@@ -72,7 +72,7 @@ B2B 售前有一个高频且耗时的环节：**销售报备进来 → 售前要
 
 两种运行模式：
 
-- **离线模式（Offline）**：不需要任何飞书凭证，跑 `examples/offline/` 下打包好的虚构样例数据。适合 CI、Demo、评委复现。
+- **离线模式（Offline）**：不需要任何飞书凭证，跑 `examples/offline/` 下打包好的虚构样例数据。适合 CI、二次开发、跨环境验证。
 - **在线模式（Live）**：通过 `examples/live/env.example` 里的环境变量指向真实的飞书多维表格。
 
 ## 支持哪些 Agent
@@ -244,7 +244,7 @@ lark-cli base +record-upsert \
 - 鉴权直接复用用户已有的飞书 CLI 登录态，不需要单独跑 OAuth
 - CLI 表层比底层 API 稳定得多，飞书 API 升级不会动到 Skill
 - 不熟悉的命令时，Agent 可以 `lark-cli --help` / `lark-cli schema` 自我发现，而不是凭空猜参数
-- 这是大赛官方主推的接入方式
+- 飞书官方主推的标准接入方式，未来跨语言/跨平台都有保障
 
 ## 飞书 CLI 集成点
 
@@ -332,14 +332,14 @@ ai-presales-via-feishu-cli/
   docs/
     architecture.md                    # 架构速读
     demo-script.md                     # 2-3 分钟 Demo 解说稿
-    contest-submission.md              # 参赛说明
+    contest-submission.md              # 项目摘要 / 提交说明
     superpowers/specs/                 # 完整设计文档（约 600 行）
   tests/                               # pytest，含全仓库隐私扫描
 ```
 
-## 给评委的复现指引
+## 5 分钟快速验证
 
-如果你是大赛评委，下面是 5 分钟内全面验证这个项目的最短路径：
+5 分钟内完整跑一遍这个项目的最短路径：
 
 ```bash
 # 1. clone

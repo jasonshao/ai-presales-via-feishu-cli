@@ -4,7 +4,7 @@
 >
 > Turn a Feishu sales report into a customer-facing solution draft in under 30 minutes — using `lark-cli` for every Feishu read and write, driven by a **portable agent skill document** (`SKILL.md`) that any modern agent can load.
 
-This repository is an entry for the [Feishu CLI Creator Competition](https://www.feishu.cn/community/article/event?id=7629204812755635148) (GitHub track, "Best Practice Award" target). It packages a real internal AI-presales workflow as an open-source, runnable skill that **any agent that can read files and run shell commands** can pick up — Claude Code, Codex, OpenClaw, Cursor, your own Agent SDK, you name it.
+An open-source **AI presales workflow skill**: a portable `SKILL.md`, three thin Python scripts, and a fictional demo dataset that turn an internal presales process into something **any agent that can read files and run shell commands** can pick up — Claude Code, Codex, OpenClaw, Cursor, your own Agent SDK, you name it.
 
 ---
 
@@ -21,7 +21,7 @@ This repository is an entry for the [Feishu CLI Creator Competition](https://www
 - [Extensibility: adding a new scenario](#extensibility-adding-a-new-scenario)
 - [Tests and privacy scan](#tests-and-privacy-scan)
 - [Repository layout](#repository-layout)
-- [Reproduction guide for judges](#reproduction-guide-for-judges)
+- [Quick validation in 5 minutes](#quick-validation-in-5-minutes)
 - [Design source of truth](#design-source-of-truth)
 - [Contributing / License](#contributing)
 
@@ -72,7 +72,7 @@ Sales report lands in Feishu Bitable
 
 Two run modes:
 
-- **Offline** — no Feishu credentials needed. Operates on the bundled fictional demo data under `examples/offline/`. Perfect for CI, demos, and judges.
+- **Offline** — no Feishu credentials needed. Operates on the bundled fictional demo data under `examples/offline/`. Perfect for CI, downstream development, and cross-environment validation.
 - **Live** — point at a Feishu Bitable via env vars in `examples/live/env.example`.
 
 ## Which agents can run this
@@ -250,7 +250,7 @@ Full live runbook in [`examples/live/feishu-command-examples.md`](examples/live/
 - Auth is shared with whatever the user already uses for Feishu — no separate OAuth flow.
 - The CLI surface stays stable as the underlying APIs evolve.
 - The agent can `lark-cli --help` / `lark-cli schema` to discover unknown command shapes at runtime, instead of guessing.
-- It's the contest's primary track.
+- It's the official, primary integration path Feishu publishes for cross-language and cross-platform automation.
 
 ## Feishu CLI integration points
 
@@ -315,7 +315,7 @@ ai-presales-via-feishu-cli/
   LICENSE                              # MIT
   pyproject.toml                       # Python 3.10+, only dep: pytest
   skills/ai-presales/
-    SKILL.md                           # ⭐ The skill — heart of the entry
+    SKILL.md                           # ⭐ The skill — heart of the project
     references/
       solution-template.md             # Customer solution Markdown template
       scenario-package-schema.md       # Scenario package field spec
@@ -338,14 +338,14 @@ ai-presales-via-feishu-cli/
   docs/
     architecture.md                    # Architecture summary
     demo-script.md                     # 2-3 minute demo narration
-    contest-submission.md              # Contest summary
+    contest-submission.md              # Project summary / submission notes
     superpowers/specs/                 # Full design doc (~600 lines)
   tests/                               # pytest, including privacy scan
 ```
 
-## Reproduction guide for judges
+## Quick validation in 5 minutes
 
-If you're a contest judge, here's the shortest path to fully validate this project in 5 minutes:
+Shortest path to a complete end-to-end check of the project:
 
 ```bash
 # 1. clone
